@@ -4,8 +4,7 @@ import re
 import sys
 
 DAMPING = 0.85
-SAMPLES = 10000
-
+SAMPLES = 1000000
 
 def main():
     if len(sys.argv) != 2:
@@ -57,7 +56,22 @@ def transition_model(corpus, page, damping_factor):
     linked to by `page`. With probability `1 - damping_factor`, choose
     a link at random chosen from all pages in the corpus.
     """
-    raise NotImplementedError
+    result = {}
+
+    if len(corpus[page]) > 0:
+        weight = damping_factor / len(corpus[page])
+        residue = (1 - damping_factor) / (len(corpus.keys()) - len(corpus[page]))
+    else:
+        weight = damping_factor / len(corpus.keys())
+        residue = weight
+
+    for current_page in corpus.keys():
+        if current_page in corpus[page]:
+            result[current_page] = weight
+        else:
+            result[current_page] = residue
+
+    return result
 
 
 def sample_pagerank(corpus, damping_factor, n):
@@ -69,7 +83,24 @@ def sample_pagerank(corpus, damping_factor, n):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    page_range = {}
+    for current_page in corpus.keys():
+        page_range[current_page] = 0
+
+    for _ in range(n):
+        page = random.choice(list(corpus.keys()))
+        distribution = transition_model(corpus, page, damping_factor)
+        for current_page in corpus.keys():
+            page_range[current_page] += distribution[current_page]
+
+    max_value = 0
+    for current_page in corpus.keys():
+        max_value += page_range[current_page]
+
+    for current_page in corpus.keys():
+        page_range[current_page] = page_range[current_page] / max_value
+
+    return page_range
 
 
 def iterate_pagerank(corpus, damping_factor):
@@ -81,7 +112,30 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    page_range = {}
+    for current_page in corpus.keys():
+        page_range[current_page] = 1 / len( corpus.keys() )
+
+    base = (1 - damping_factor) / len(corpus.keys())
+
+    for current_page in corpus.keys():
+
+        aux_sum = 0
+        for page in corpus.keys():
+            if len(corpus[page]) > 0 and current_page in corpus[page]:
+                i_probability = 1 / len( corpus[page] )
+                aux_sum += i_probability / len(corpus[page])
+
+        page_range[current_page] += base + (damping_factor * aux_sum)
+
+    max_value = 0
+    for current_page in corpus.keys():
+        max_value += page_range[current_page]
+
+    for current_page in corpus.keys():
+        page_range[current_page] = page_range[current_page] / max_value
+
+    return page_range
 
 
 if __name__ == "__main__":
