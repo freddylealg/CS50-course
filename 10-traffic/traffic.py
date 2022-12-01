@@ -3,6 +3,7 @@ import numpy as np
 import os
 import sys
 import tensorflow as tf
+import pandas as pd
 
 from sklearn.model_selection import train_test_split
 
@@ -58,7 +59,24 @@ def load_data(data_dir):
     be a list of integer labels, representing the categories for each of the
     corresponding `images`.
     """
-    raise NotImplementedError
+    image_list = []
+    label_list = []
+    data_dir = '.' + os.sep + data_dir
+    dim = (IMG_WIDTH, IMG_HEIGHT)
+
+    list_dir = os.listdir( data_dir )
+    for label in list_dir:
+        list_files = os.listdir(data_dir + os.sep + label)
+        for file in list_files:
+            img = cv2.imread( data_dir + os.sep + label + os.sep + file, 0)
+            img = cv2.resize(img, dim)
+            image_list.append( img )
+            label_list.append( label )
+
+    image_list = np.asarray(image_list)
+    label_list = np.asarray(label_list)
+
+    return image_list, label_list
 
 
 def get_model():
@@ -67,8 +85,20 @@ def get_model():
     `input_shape` of the first layer is `(IMG_WIDTH, IMG_HEIGHT, 3)`.
     The output layer should have `NUM_CATEGORIES` units, one for each category.
     """
-    raise NotImplementedError
+    model = tf.keras.Sequential()
 
+    model.add(tf.keras.layers.Conv2D(64, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 1)))
+    model.add(tf.keras.layers.Conv2D(32, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 1)))
+    model.add(tf.keras.layers.Conv2D(16, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 1)))
+    model.add(tf.keras.layers.Flatten())
+    model.add(tf.keras.layers.Dense(1024, activation="relu"))
+    model.add(tf.keras.layers.Dense(512, activation="relu"))
+    model.add(tf.keras.layers.Dense(256, activation="relu"))
+    model.add(tf.keras.layers.Dense(128, activation="relu"))
+    model.add(tf.keras.layers.Dense(43, activation='softmax'))
+
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    return model
 
 if __name__ == "__main__":
     main()
