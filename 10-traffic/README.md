@@ -8,4 +8,4 @@ What is the perfect relation between size and accuracy?
 
 How do we know when we are overfitting?
 
-These answers will arrive whit the experience, maybe.
+These answers will arrive with the experience, maybe.

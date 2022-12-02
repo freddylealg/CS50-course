@@ -14,8 +14,22 @@ V -> "arrived" | "came" | "chuckled" | "had" | "lit" | "said" | "sat"
 V -> "smiled" | "tell" | "were"
 """
 
+# Original nonterminals
+# NONTERMINALS = """
+# S -> NP | NP V | NP V NP | NP V S | NP V NP Conj S | NP V NP Conj V S | NP V Adv Conj V S
+# NP -> N | N Conj | N Conj N | N Adj | N Adv | N P | N P NP
+# NP -> P N | P Det N | P Det N Adv | P Det Adj NP
+# NP -> Det N | Det N Adv | Det N NP | Det Adj | Det Adj NP | N
+# NP -> Adj NP
+# """
+
+# Debug nonterminals
 NONTERMINALS = """
-S -> N V
+S -> NP | V | NP V | NP V S | NP Conj S | Adv Conj V S
+NP -> N | N Conj | N Conj N | N Adj | N Adv | N P | N P NP
+NP -> P N | P Det N | P Det N Adv | P Det Adj NP 
+NP -> Det N | Det N Adv | Det N NP | Det Adj | Det Adj NP | N
+NP -> Adj NP  
 """
 
 grammar = nltk.CFG.fromstring(NONTERMINALS + TERMINALS)
@@ -35,6 +49,7 @@ def main():
 
     # Convert input into list of words
     s = preprocess(s)
+    print(s)
 
     # Attempt to parse sentence
     try:
@@ -62,7 +77,10 @@ def preprocess(sentence):
     and removing any word that does not contain at least one alphabetic
     character.
     """
-    raise NotImplementedError
+    sentence = sentence.replace(".", "").replace("\n", "").lower()
+    sentence = sentence.strip()
+    word_list = sentence.split(" ")
+    return word_list
 
 
 def np_chunk(tree):
@@ -72,7 +90,15 @@ def np_chunk(tree):
     whose label is "NP" that does not itself contain any other
     noun phrases as subtrees.
     """
-    raise NotImplementedError
+    list_to_return = []
+    count = 0
+    for aux in tree:
+        if aux.label() == 'NP':
+            list_to_return.append( aux )
+        elif aux.label() == 'S':
+            list_to_return.extend( np_chunk( tree[count] ) )
+        count += 1
+    return list_to_return
 
 
 if __name__ == "__main__":
