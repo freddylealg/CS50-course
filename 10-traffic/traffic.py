@@ -65,6 +65,7 @@ def load_data(data_dir):
     dim = (IMG_WIDTH, IMG_HEIGHT)
 
     list_dir = os.listdir( data_dir )
+
     for label in list_dir:
         list_files = os.listdir(data_dir + os.sep + label)
         for file in list_files:
@@ -87,12 +88,8 @@ def get_model():
     """
     model = tf.keras.Sequential()
 
-    model.add(tf.keras.layers.Conv2D(64, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 1)))
-    model.add(tf.keras.layers.Conv2D(32, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 1)))
     model.add(tf.keras.layers.Conv2D(16, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 1)))
     model.add(tf.keras.layers.Flatten())
-    model.add(tf.keras.layers.Dense(1024, activation="relu"))
-    model.add(tf.keras.layers.Dense(512, activation="relu"))
     model.add(tf.keras.layers.Dense(256, activation="relu"))
     model.add(tf.keras.layers.Dense(128, activation="relu"))
     model.add(tf.keras.layers.Dense(43, activation='softmax'))
