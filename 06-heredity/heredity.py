@@ -141,46 +141,46 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         * everyone not in set` have_trait` does not have the trait.
     """
     result = 1
+    prob_gene = 1
     for person in people.keys():
-        if people[person]['mother'] is not None and people[person]['father']:
-
+        if people[person]['mother'] is not None and people[person]['father'] is not None:
+            
             if people[person]['mother'] in two_genes:
                 prob_gene_mother = 1 - PROBS["mutation"]
             elif people[person]['mother'] in one_gene:
-                prob_gene_mother = 1 - PROBS["mutation"]
+                prob_gene_mother = 0.5
             else:
                 prob_gene_mother = PROBS["mutation"]
 
             if people[person]['father'] in two_genes:
                 prob_gene_father = 1 - PROBS["mutation"]
             elif people[person]['father'] in one_gene:
-                prob_gene_father = 1 - PROBS["mutation"]
+                prob_gene_father = 0.5
             else:
                 prob_gene_father = PROBS["mutation"]
 
-            prob_gene_mother *= prob_gene_mother
-            prob_gene_father *= prob_gene_father
-            prob_gene = prob_gene_mother + prob_gene_father
-
-            if person in two_genes:
-                prob_trait = PROBS["trait"][2][ person in have_trait ]
-            elif person in one_gene:
-                prob_trait = PROBS["trait"][1][ person in have_trait ]
+            if people[person]['name'] in two_genes:
+                prob_gene *= prob_gene_mother * prob_gene_father
+            elif people[person]['name'] in one_gene:
+                prob_gene *= (1 - prob_gene_mother) * prob_gene_father + (1 - prob_gene_father) * prob_gene_mother
             else:
-                prob_trait = PROBS["trait"][0][ person in have_trait ]
+                prob_gene *= (1 - prob_gene_mother) * (1 - prob_gene_father)
+
 
         else:
             if person in two_genes:
                 prob_gene = PROBS["gene"][2]
-                prob_trait = PROBS["trait"][2][ person in have_trait ]
-
             elif person in one_gene:
                 prob_gene = PROBS["gene"][1]
-                prob_trait = PROBS["trait"][1][ person in have_trait ]
-
             else:
                 prob_gene = PROBS["gene"][0]
-                prob_trait = PROBS["trait"][0][ person in have_trait ]
+
+        if person in two_genes:
+                prob_trait = PROBS["trait"][2][ person in have_trait ]
+        elif person in one_gene:
+            prob_trait = PROBS["trait"][1][ person in have_trait ]
+        else:
+            prob_trait = PROBS["trait"][0][ person in have_trait ]
 
         result = result * (prob_gene * prob_trait)
     return result
