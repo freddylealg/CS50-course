@@ -4,7 +4,7 @@ import re
 import sys
 
 DAMPING = 0.85
-SAMPLES = 1000000
+SAMPLES = 10000
 
 def main():
     if len(sys.argv) != 2:
@@ -87,11 +87,18 @@ def sample_pagerank(corpus, damping_factor, n):
     for current_page in corpus.keys():
         page_range[current_page] = 0
 
+    page = random.choice(list(corpus.keys()))
+
     for _ in range(n):
-        page = random.choice(list(corpus.keys()))
         distribution = transition_model(corpus, page, damping_factor)
+        random_value = random.random()
+        count = 0
         for current_page in corpus.keys():
-            page_range[current_page] += distribution[current_page]
+            count += distribution[current_page]
+            if random_value <= count:
+                page = current_page
+                break
+        page_range[page] += 1
 
     max_value = 0
     for current_page in corpus.keys():
@@ -119,14 +126,14 @@ def iterate_pagerank(corpus, damping_factor):
     base = (1 - damping_factor) / len(corpus.keys())
 
     for current_page in corpus.keys():
-
         aux_sum = 0
         for page in corpus.keys():
-            if len(corpus[page]) > 0 and current_page in corpus[page]:
-                i_probability = 1 / len( corpus[page] )
-                aux_sum += i_probability / len(corpus[page])
+            if len(corpus[page]) == 0:
+                aux_sum += page_range[page] / len(corpus.keys())
+            elif current_page in corpus[page]:
+                aux_sum += page_range[page] / len(corpus[page])
 
-        page_range[current_page] += base + (damping_factor * aux_sum)
+        page_range[current_page] = base + (damping_factor * aux_sum)
 
     max_value = 0
     for current_page in corpus.keys():
